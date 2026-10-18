@@ -14,7 +14,11 @@ pub use event::{Event, Key};
 /// picking their own version of the raw bindings.
 pub use gl;
 
+pub mod camera;
 pub mod gl_mesh;
 pub mod obj;
+pub mod primitives;
 pub mod shader;
 pub mod transform;
+
+pub use camera::Camera;

@@ -19,9 +19,8 @@ API, per the subject's constraints.
   from a from-scratch C++ OBJ loader written for an earlier 42 project
   (`~/scop`). Unit tested, including against the bundled
   `assets/models/42.obj`.
-- Camera — basic `look_at`/perspective framing exists (see `mesh_demo`); a
-  dedicated `Camera` type (zoom, cached look-at params, like `~/scop`'s) not
-  built yet.
+- Camera — **built**: `src/camera.rs`, a `Camera` type (perspective + cached
+  look-at params + dolly `zoom`), same design as `~/scop`'s. Unit tested.
 - Own transformation math — **built**: `src/transform.rs` on top of the
   [`pulgamecanica_matrix`](https://crates.io/crates/pulgamecanica_matrix)
   dependency (which supplies `projection()`); `translate`/`scale`/
@@ -37,9 +36,16 @@ API, per the subject's constraints.
 - 2D & 3D canvas — not started yet.
 
 `src/gl_mesh.rs` uploads a parsed `obj::Mesh` to a VAO/VBO/EBO and draws it.
-`cargo run --example mesh_demo` ties all of the above together: loads
+`src/primitives.rs` generates procedural meshes (cube, ground plane) in the
+same `Mesh` shape, for gameplay geometry that isn't OBJ-authored —
+`pulga_run`'s player/obstacles/ground use these.
+`cargo run --example mesh_demo` ties the OBJ pipeline together: loads
 `assets/models/42.obj`, compiles the shader, and spins the logo in front of
 an auto-framed camera.
+
+`App::title()` (default `None`) lets a consumer update the window title
+every frame it returns `Some` — `pulga_run` uses it as a crude distance
+meter, since there's no on-screen text rendering yet.
 
 ## Usage
 

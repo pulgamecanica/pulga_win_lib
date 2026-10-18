@@ -37,6 +37,13 @@ pub trait App {
     fn init(&mut self) {}
     fn event(&mut self, event: Event);
     fn draw(&mut self);
+
+    /// Returning `Some(title)` after a draw updates the window title (e.g.
+    /// a distance meter); called every frame, so apps should debounce if the
+    /// string changes rarely. `None` (the default) leaves the title as-is.
+    fn title(&self) -> Option<String> {
+        None
+    }
 }
 
 struct GlState {
@@ -144,6 +151,9 @@ impl<A: App> ApplicationHandler for Handler<A> {
             WindowEvent::RedrawRequested => {
                 self.app.event(Event::RedrawRequested);
                 self.app.draw();
+                if let Some(title) = self.app.title() {
+                    gl.window.set_title(&title);
+                }
                 gl.surface.swap_buffers(&gl.context).expect("failed to swap buffers");
             }
             _ => {}
