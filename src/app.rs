@@ -48,6 +48,12 @@ pub trait App {
     fn title(&self) -> Option<String> {
         None
     }
+
+    /// Polled once per frame; returning `true` closes the window and returns
+    /// from [`run`] cleanly (GL resources dropped, unlike `process::exit`).
+    fn should_quit(&self) -> bool {
+        false
+    }
 }
 
 struct GlState {
@@ -183,7 +189,11 @@ impl<A: App> ApplicationHandler for Handler<A> {
         }
     }
 
-    fn about_to_wait(&mut self, _event_loop: &ActiveEventLoop) {
+    fn about_to_wait(&mut self, event_loop: &ActiveEventLoop) {
+        if self.app.should_quit() {
+            event_loop.exit();
+            return;
+        }
         if let Some(gl) = &self.gl {
             gl.window.request_redraw();
         }
