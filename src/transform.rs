@@ -6,26 +6,10 @@
 //! the same formulas used in an earlier from-scratch C++ renderer
 //! (~/scop/srcs/Math.cpp).
 
+use crate::vec3::{cross, dot, normalize, sub};
 use pulgamecanica_matrix::pulgamecanica::Matrix;
 
 pub type Mat4 = Matrix<f32>;
-
-fn sub(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
-    [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
-}
-
-fn cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
-    [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
-}
-
-fn dot(a: [f32; 3], b: [f32; 3]) -> f32 {
-    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
-}
-
-fn normalize(v: [f32; 3]) -> [f32; 3] {
-    let len = dot(v, v).sqrt();
-    if len > 0.0 { [v[0] / len, v[1] / len, v[2] / len] } else { [0.0, 0.0, 0.0] }
-}
 
 pub fn identity() -> Mat4 {
     Matrix::from([

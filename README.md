@@ -23,9 +23,13 @@ API, per the subject's constraints.
   look-at params + dolly `zoom`), same design as `~/scop`'s. Unit tested.
 - Own transformation math — **built**: `src/transform.rs` on top of the
   [`pulgamecanica_matrix`](https://crates.io/crates/pulgamecanica_matrix)
-  dependency (which supplies `projection()`); `translate`/`scale`/
-  `rotate_axis_angle`/`look_at` ported from the same `~/scop` C++ math code.
-  Unit tested.
+  dependency, which supplies both `projection()` and the vector ops
+  (`dot`/`cross_product`/`norm`/`add`/`sub`) — `src/vec3.rs` is a thin
+  `[f32; 3]` ergonomic wrapper over `pulgamecanica_matrix::Vector<f32>`,
+  shared by `obj`, `transform` and `camera` so the actual math lives in one
+  place (the crate), not reimplemented three times. `translate`/`scale`/
+  `rotate_axis_angle`/`look_at` (the matrix formulas) ported from the same
+  `~/scop` C++ math code. Unit tested.
 - Shader compilation/management — **built**: `src/shader.rs`
   (`link_program`, raw `glCompileShader`/`glLinkProgram` with error-log
   surfacing). `assets/shaders/mesh.{vert,frag}` adapted from `~/scop`'s

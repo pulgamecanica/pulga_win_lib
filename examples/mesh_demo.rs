@@ -3,7 +3,9 @@
 //! check for `obj`, `shader`, `gl_mesh` and `transform`.
 //! `cargo run --example mesh_demo` (needs a display).
 
-use pulga_win_lib::{App, Event, Key, WindowConfig, gl, gl_mesh::GlMesh, obj, run, shader, transform};
+use pulga_win_lib::{
+    App, Event, Key, WindowConfig, gl, gl_mesh::GlMesh, obj, run, shader, transform,
+};
 use pulgamecanica_matrix::pulgamecanica::projection_matrix::projection;
 use std::time::Instant;
 
@@ -100,12 +102,23 @@ impl App for MeshDemo {
             gl::UseProgram(self.program);
             gl::UniformMatrix4fv(self.proj_loc, 1, gl::TRUE, transform::to_gl(&proj).as_ptr());
             gl::UniformMatrix4fv(self.view_loc, 1, gl::TRUE, transform::to_gl(&view).as_ptr());
-            gl::UniformMatrix4fv(self.model_loc, 1, gl::TRUE, transform::to_gl(&model).as_ptr());
+            gl::UniformMatrix4fv(
+                self.model_loc,
+                1,
+                gl::TRUE,
+                transform::to_gl(&model).as_ptr(),
+            );
             mesh.draw();
         }
     }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    run(WindowConfig { title: "pulga_win_lib mesh_demo — 42".into(), ..Default::default() }, MeshDemo::new())
+    run(
+        WindowConfig {
+            title: "pulga_win_lib mesh_demo — 42".into(),
+            ..Default::default()
+        },
+        MeshDemo::new(),
+    )
 }

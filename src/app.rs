@@ -14,7 +14,7 @@ use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
 use winit::keyboard::PhysicalKey;
 use winit::window::{Window, WindowAttributes, WindowId};
 
-use crate::event::{translate_key, Event, Key};
+use crate::event::{Event, Key, translate_key};
 
 /// Configuration for the window pulga_win_lib opens.
 pub struct WindowConfig {
@@ -25,7 +25,11 @@ pub struct WindowConfig {
 
 impl Default for WindowConfig {
     fn default() -> Self {
-        Self { title: "42run".to_string(), width: 1280, height: 720 }
+        Self {
+            title: "42run".to_string(),
+            width: 1280,
+            height: 720,
+        }
     }
 }
 
@@ -80,7 +84,11 @@ impl<A: App> ApplicationHandler for Handler<A> {
             .build(event_loop, template, |configs| {
                 configs
                     .reduce(|accum, config| {
-                        if config.num_samples() > accum.num_samples() { config } else { accum }
+                        if config.num_samples() > accum.num_samples() {
+                            config
+                        } else {
+                            accum
+                        }
                     })
                     .expect("no GL configs available")
             })
@@ -118,11 +126,16 @@ impl<A: App> ApplicationHandler for Handler<A> {
             gl_display.get_proc_address(symbol.as_c_str()).cast()
         });
 
-        let _ = surface
-            .set_swap_interval(&context, SwapInterval::Wait(NonZeroU32::new(1).unwrap()));
+        let _ =
+            surface.set_swap_interval(&context, SwapInterval::Wait(NonZeroU32::new(1).unwrap()));
 
         self.app.init();
-        self.gl = Some(GlState { display: gl_display, surface, context, window });
+        self.gl = Some(GlState {
+            display: gl_display,
+            surface,
+            context,
+            window,
+        });
     }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
@@ -137,15 +150,23 @@ impl<A: App> ApplicationHandler for Handler<A> {
                     gl.window.resize_surface(&gl.surface, &gl.context);
                     unsafe { gl::Viewport(0, 0, size.width as i32, size.height as i32) };
                 }
-                self.app.event(Event::Resized { width: size.width, height: size.height });
+                self.app.event(Event::Resized {
+                    width: size.width,
+                    height: size.height,
+                });
             }
-            WindowEvent::KeyboardInput { event: key_event, .. } => {
+            WindowEvent::KeyboardInput {
+                event: key_event, ..
+            } => {
                 let key = match key_event.physical_key {
                     PhysicalKey::Code(code) => translate_key(code),
                     PhysicalKey::Unidentified(_) => Key::Other,
                 };
-                let translated =
-                    if key_event.state.is_pressed() { Event::KeyDown(key) } else { Event::KeyUp(key) };
+                let translated = if key_event.state.is_pressed() {
+                    Event::KeyDown(key)
+                } else {
+                    Event::KeyUp(key)
+                };
                 self.app.event(translated);
             }
             WindowEvent::RedrawRequested => {
@@ -154,7 +175,9 @@ impl<A: App> ApplicationHandler for Handler<A> {
                 if let Some(title) = self.app.title() {
                     gl.window.set_title(&title);
                 }
-                gl.surface.swap_buffers(&gl.context).expect("failed to swap buffers");
+                gl.surface
+                    .swap_buffers(&gl.context)
+                    .expect("failed to swap buffers");
             }
             _ => {}
         }
@@ -168,10 +191,17 @@ impl<A: App> ApplicationHandler for Handler<A> {
 }
 
 /// Opens a window and runs `app` until the window is closed.
-pub fn run(config: WindowConfig, app: impl App + 'static) -> Result<(), Box<dyn std::error::Error>> {
+pub fn run(
+    config: WindowConfig,
+    app: impl App + 'static,
+) -> Result<(), Box<dyn std::error::Error>> {
     let event_loop = EventLoop::new()?;
     event_loop.set_control_flow(ControlFlow::Poll);
-    let mut handler = Handler { config, app, gl: None };
+    let mut handler = Handler {
+        config,
+        app,
+        gl: None,
+    };
     event_loop.run_app(&mut handler)?;
     Ok(())
 }

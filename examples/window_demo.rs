@@ -21,5 +21,11 @@ impl App for Demo {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    run(WindowConfig { title: "pulga_win_lib window_demo".into(), ..Default::default() }, Demo)
+    run(
+        WindowConfig {
+            title: "pulga_win_lib window_demo".into(),
+            ..Default::default()
+        },
+        Demo,
+    )
 }

@@ -7,7 +7,7 @@
 mod app;
 pub mod event;
 
-pub use app::{run, App, WindowConfig};
+pub use app::{App, WindowConfig, run};
 pub use event::{Event, Key};
 
 /// Re-exported so downstream crates (pulga_gui_lib, pulga_run) call GL without
@@ -20,5 +20,6 @@ pub mod obj;
 pub mod primitives;
 pub mod shader;
 pub mod transform;
+mod vec3;
 
 pub use camera::Camera;

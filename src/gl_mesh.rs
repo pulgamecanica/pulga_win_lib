@@ -82,7 +82,12 @@ impl GlMesh {
 
             gl::BindVertexArray(0);
 
-            Self { vao, vbo, ebo, index_count: mesh.indices.len() as i32 }
+            Self {
+                vao,
+                vbo,
+                ebo,
+                index_count: mesh.indices.len() as i32,
+            }
         }
     }
 
@@ -91,7 +96,12 @@ impl GlMesh {
     pub unsafe fn draw(&self) {
         unsafe {
             gl::BindVertexArray(self.vao);
-            gl::DrawElements(gl::TRIANGLES, self.index_count, gl::UNSIGNED_INT, std::ptr::null());
+            gl::DrawElements(
+                gl::TRIANGLES,
+                self.index_count,
+                gl::UNSIGNED_INT,
+                std::ptr::null(),
+            );
             gl::BindVertexArray(0);
         }
     }

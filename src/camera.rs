@@ -4,6 +4,7 @@
 //! caller re-supplying eye/center/up every frame.
 
 use crate::transform::{self, Mat4};
+use crate::vec3::{add, norm, normalize, sub};
 use pulgamecanica_matrix::pulgamecanica::projection_matrix::projection;
 
 pub struct Camera {
@@ -17,16 +18,6 @@ pub struct Camera {
 }
 
 const MIN_DISTANCE: f32 = 0.05;
-
-fn sub(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
-    [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
-}
-fn add(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
-    [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
-}
-fn len(v: [f32; 3]) -> f32 {
-    (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt()
-}
 
 impl Camera {
     pub fn new(fov_radians: f32, aspect: f32, znear: f32, zfar: f32) -> Self {
@@ -56,12 +47,16 @@ impl Camera {
     /// Distance is clamped so the eye never reaches (or passes) the target.
     pub fn zoom(&mut self, factor: f32) {
         let offset = sub(self.eye, self.center);
-        let distance = (len(offset) * factor).max(MIN_DISTANCE);
-        let direction = {
-            let l = len(offset);
-            if l > 0.0 { [offset[0] / l, offset[1] / l, offset[2] / l] } else { [0.0, 0.0, 1.0] }
-        };
-        self.eye = add(self.center, [direction[0] * distance, direction[1] * distance, direction[2] * distance]);
+        let distance = (norm(offset) * factor).max(MIN_DISTANCE);
+        let direction = if norm(offset) > 0.0 { normalize(offset) } else { [0.0, 0.0, 1.0] };
+        self.eye = add(
+            self.center,
+            [
+                direction[0] * distance,
+                direction[1] * distance,
+                direction[2] * distance,
+            ],
+        );
     }
 
     pub fn proj(&self) -> Mat4 {
