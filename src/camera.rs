@@ -4,7 +4,7 @@
 //! caller re-supplying eye/center/up every frame.
 
 use crate::transform::{self, Mat4};
-use crate::vec3::{add, norm, normalize, sub};
+use crate::vec3::{add, cross, norm, normalize, sub};
 use pulgamecanica_matrix::pulgamecanica::projection_matrix::projection;
 
 pub struct Camera {
@@ -74,6 +74,19 @@ impl Camera {
     pub fn eye(&self) -> [f32; 3] {
         self.eye
     }
+
+    /// The world-space ray from the eye through a point on screen, for mouse
+    /// picking. `ndc_x`/`ndc_y` are normalized device coordinates: -1..1,
+    /// left to right and bottom to top. Returns `(origin, unit direction)`.
+    pub fn ray(&self, ndc_x: f32, ndc_y: f32) -> ([f32; 3], [f32; 3]) {
+        let forward = normalize(sub(self.center, self.eye));
+        let right = normalize(cross(forward, self.up));
+        let up = cross(right, forward);
+        let half_h = (self.fov / 2.0).tan(); // fov is vertical, like projection()
+        let (sx, sy) = (ndc_x * half_h * self.aspect, ndc_y * half_h);
+        let dir = [0, 1, 2].map(|i| forward[i] + right[i] * sx + up[i] * sy);
+        (self.eye, normalize(dir))
+    }
 }
 
 #[cfg(test)]
@@ -94,6 +107,20 @@ mod tests {
         cam.look_at([0.0, 0.0, 10.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
         cam.zoom(2.0);
         assert!((cam.eye()[2] - 20.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn ray_through_center_and_right_edge() {
+        let mut cam = Camera::new(std::f32::consts::FRAC_PI_2, 2.0, 0.1, 100.0);
+        cam.look_at([0.0, 0.0, 5.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
+        let (origin, center) = cam.ray(0.0, 0.0);
+        assert_eq!(origin, [0.0, 0.0, 5.0]);
+        assert!((center[2] + 1.0).abs() < 1e-5);
+        // 90° vertical fov, aspect 2: the right edge is 2 units right per unit forward.
+        let (_, right) = cam.ray(1.0, 0.0);
+        assert!((right[0] / -right[2] - 2.0).abs() < 1e-5);
+        let (_, top) = cam.ray(0.0, 1.0);
+        assert!((top[1] / -top[2] - 1.0).abs() < 1e-5);
     }
 
     #[test]
