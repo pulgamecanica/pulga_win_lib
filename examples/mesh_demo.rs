@@ -3,11 +3,11 @@
 //! check for `obj`, `shader`, `gl_mesh` and `transform`.
 //! `cargo run --example mesh_demo` (needs a display).
 
+use pulga_win_lib::time::Instant;
 use pulga_win_lib::{
     App, Event, Key, WindowConfig, gl, gl_mesh::GlMesh, obj, run, shader, transform,
 };
 use pulgamecanica_matrix::pulgamecanica::projection_matrix::projection;
-use std::time::Instant;
 
 struct MeshDemo {
     mesh: Option<GlMesh>,

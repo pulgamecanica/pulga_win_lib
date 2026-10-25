@@ -48,7 +48,11 @@ impl Camera {
     pub fn zoom(&mut self, factor: f32) {
         let offset = sub(self.eye, self.center);
         let distance = (norm(offset) * factor).max(MIN_DISTANCE);
-        let direction = if norm(offset) > 0.0 { normalize(offset) } else { [0.0, 0.0, 1.0] };
+        let direction = if norm(offset) > 0.0 {
+            normalize(offset)
+        } else {
+            [0.0, 0.0, 1.0]
+        };
         self.eye = add(
             self.center,
             [

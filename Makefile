@@ -1,4 +1,4 @@
-.PHONY: help build test fmt clippy clean doc coverage window-demo mesh-demo
+.PHONY: help build test fmt clippy clean doc coverage window-demo mesh-demo wasm-test
 
 .DEFAULT_GOAL := help
 
@@ -31,3 +31,9 @@ window-demo: ## Open an empty window (needs a display)
 
 mesh-demo: ## Load+shade+spin the bundled 42-logo OBJ (needs a display)
 	cargo run --example mesh_demo
+
+wasm-test: ## Run the wasm32 tests (e.g. time::Instant) in headless Firefox (needs `make -C .. wasm-image` once)
+	podman run --rm \
+		-v $(CURDIR):$(CURDIR):Z \
+		-w $(CURDIR) \
+		localhost/pulga-wasm-test wasm-pack test --headless --firefox -- --lib
