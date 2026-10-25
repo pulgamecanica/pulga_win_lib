@@ -8,8 +8,9 @@ API, per the subject's constraints.
 - Window + input event handling — **built**: `winit` for the window/event loop,
   `glutin`/`glutin-winit` only for native GL *context* creation (not a GL
   wrapper), raw `gl` crate bindings for OpenGL itself. See `src/app.rs`
-  (the `App` trait + `run()`) and `src/event.rs` (winit → our own `Event`
-  enum, unit tested).
+  (the `App` trait + `run()`, `App::should_quit` for a clean exit) and
+  `src/event.rs` (winit → our own `Event` enum: keys incl. letters/digits/
+  F-keys by physical position, mouse move/buttons/wheel; unit tested).
 - OpenGL support (primary target for this project) — **built**: a live
   GL 4.1 context.
 - Vulkan support — not started yet.
@@ -45,7 +46,15 @@ API, per the subject's constraints.
   Vulkan-clip-space flip; kept the per-face hash coloring + diffuse shading).
   No texture sampling yet (`~/scop`'s triplanar/UV blend) — that needs a PNG
   decoder first.
-- 2D & 3D canvas — not started yet.
+- 2D & 3D canvas — **built**:
+  - `src/render.rs`: `MeshRenderer`, a ready-made 3D pipeline (meshes in one
+    flat color under a fixed directional light, `assets/shaders/flat.*`) and
+    `clear()`.
+  - `src/canvas.rs`: `Canvas2d`, batched colored/textured rectangles in
+    window pixels with alpha blending (`assets/shaders/canvas.*`) — what
+    `pulga_gui_lib` draws widgets and text with.
+  - `src/texture.rs`: RGBA `Texture` upload (nearest/linear). Pixel data
+    comes from the caller (generated, or from a single-format decoder).
 
 `src/gl_mesh.rs` uploads a parsed `obj::Mesh` to a VAO/VBO/EBO and draws it.
 `src/primitives.rs` generates procedural meshes (cube, ground plane) in the

@@ -9,12 +9,12 @@ use glutin::surface::{Surface, SurfaceAttributesBuilder, SwapInterval, WindowSur
 use glutin_winit::{DisplayBuilder, GlWindow};
 use raw_window_handle::HasWindowHandle;
 use winit::application::ApplicationHandler;
-use winit::event::WindowEvent;
+use winit::event::{MouseScrollDelta, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
 use winit::keyboard::PhysicalKey;
 use winit::window::{Window, WindowAttributes, WindowId};
 
-use crate::event::{Event, Key, translate_key};
+use crate::event::{Event, Key, translate_button, translate_key};
 
 /// Configuration for the window pulga_win_lib opens.
 pub struct WindowConfig {
@@ -174,6 +174,29 @@ impl<A: App> ApplicationHandler for Handler<A> {
                     Event::KeyUp(key)
                 };
                 self.app.event(translated);
+            }
+            WindowEvent::CursorMoved { position, .. } => {
+                self.app.event(Event::MouseMoved {
+                    x: position.x as f32,
+                    y: position.y as f32,
+                });
+            }
+            WindowEvent::MouseInput { state, button, .. } => {
+                if let Some(button) = translate_button(button) {
+                    self.app.event(if state.is_pressed() {
+                        Event::MouseDown(button)
+                    } else {
+                        Event::MouseUp(button)
+                    });
+                }
+            }
+            WindowEvent::MouseWheel { delta, .. } => {
+                let lines = match delta {
+                    MouseScrollDelta::LineDelta(_, y) => y,
+                    // Touchpads report pixels; ~40px per wheel notch.
+                    MouseScrollDelta::PixelDelta(p) => p.y as f32 / 40.0,
+                };
+                self.app.event(Event::Wheel(lines));
             }
             WindowEvent::RedrawRequested => {
                 self.app.event(Event::RedrawRequested);

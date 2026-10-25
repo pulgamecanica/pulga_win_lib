@@ -11,17 +11,20 @@ pub mod event;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use app::{App, WindowConfig, run};
-pub use event::{Event, Key};
+pub use event::{Event, Key, MouseButton};
 
 /// Re-exported so downstream crates (pulga_gui_lib, pulga_run) call GL without
 /// picking their own version of the raw bindings.
 pub use gl;
 
 pub mod camera;
+pub mod canvas;
 pub mod gl_mesh;
 pub mod obj;
 pub mod primitives;
+pub mod render;
 pub mod shader;
+pub mod texture;
 pub mod time;
 
 pub mod transform;
