@@ -6,7 +6,6 @@
 use pulga_win_lib::{
     App, Event, Key, WindowConfig, gl, gl_mesh::GlMesh, obj, run, shader, transform,
 };
-use pulgamecanica_matrix::pulgamecanica::projection_matrix::projection;
 use std::time::Instant;
 
 struct MeshDemo {
@@ -93,7 +92,7 @@ impl App for MeshDemo {
             self.centroid[2] + self.eye_distance * t.cos() * 0.6 + self.eye_distance * 0.4,
         ];
         let view = transform::look_at(eye, self.centroid, [0.0, 1.0, 0.0]);
-        let proj = projection(70f32.to_radians(), self.aspect, 0.1, 100.0);
+        let proj = transform::perspective(70f32.to_radians(), self.aspect, 0.1, 100.0);
         let model = transform::rotate_axis_angle([0.0, 1.0, 0.0], t * 0.6);
 
         unsafe {

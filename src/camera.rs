@@ -5,7 +5,6 @@
 
 use crate::transform::{self, Mat4};
 use crate::vec3::{add, norm, normalize, sub};
-use pulgamecanica_matrix::pulgamecanica::projection_matrix::projection;
 
 pub struct Camera {
     fov: f32,
@@ -60,7 +59,7 @@ impl Camera {
     }
 
     pub fn proj(&self) -> Mat4 {
-        projection(self.fov, self.aspect, self.znear, self.zfar)
+        transform::perspective(self.fov, self.aspect, self.znear, self.zfar)
     }
 
     pub fn view(&self) -> Mat4 {

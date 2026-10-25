@@ -37,6 +37,22 @@ pub fn scale(s: [f32; 3]) -> Mat4 {
     ])
 }
 
+/// Right-handed perspective projection (OpenGL clip-space convention, z in
+/// `[-1, 1]`). `pulgamecanica_matrix::projection_matrix::projection()` has a
+/// variable-shadowing bug that corrupts the Y-centering term (it computes a
+/// `b` for the bottom frustum bound, then reuses that name for the Y-scale
+/// factor before the *original* `b` is used again) — so we build our own
+/// here, same formula source as the rest of this module (`~/scop/srcs/Math.cpp`).
+pub fn perspective(fovy_radians: f32, aspect: f32, near: f32, far: f32) -> Mat4 {
+    let f = 1.0 / (fovy_radians / 2.0).tan();
+    Matrix::from([
+        [f / aspect, 0.0, 0.0, 0.0],
+        [0.0, f, 0.0, 0.0],
+        [0.0, 0.0, (far + near) / (near - far), (2.0 * far * near) / (near - far)],
+        [0.0, 0.0, -1.0, 0.0],
+    ])
+}
+
 /// Right-handed rotation of `radians` around `axis` (need not be normalized).
 pub fn rotate_axis_angle(axis: [f32; 3], radians: f32) -> Mat4 {
     let [x, y, z] = normalize(axis);
@@ -117,6 +133,24 @@ mod tests {
         // (T * S) applied to a point scales first, then translates.
         let m = translate([10.0, 0.0, 0.0]).mul_mat(&scale([2.0, 2.0, 2.0]));
         assert_close(mul_point(&m, [1.0, 0.0, 0.0]), [12.0, 0.0, 0.0]);
+    }
+
+    /// Regression test for the shadowing bug in
+    /// `pulgamecanica_matrix::projection_matrix::projection()`: a point
+    /// straight down the view axis must land at NDC (0, 0), not just on the
+    /// correct side of the near/far planes. This is exactly what a plain
+    /// "does it build" smoke test would miss — the X row was fine, only Y
+    /// was corrupted, and only the full clip-space divide exposes it.
+    #[test]
+    fn perspective_centers_a_point_on_the_view_axis() {
+        let proj = perspective(60f32.to_radians(), 16.0 / 9.0, 0.1, 100.0);
+        let clip = {
+            let v = pulgamecanica_matrix::pulgamecanica::Vector::new(vec![0.0, 0.0, -10.0, 1.0]);
+            proj.mul_vec(&v)
+        };
+        let ndc = [clip.data[0] / clip.data[3], clip.data[1] / clip.data[3]];
+        assert!(ndc[0].abs() < 1e-5, "ndc.x = {}", ndc[0]);
+        assert!(ndc[1].abs() < 1e-5, "ndc.y = {}", ndc[1]);
     }
 
     #[test]
