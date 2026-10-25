@@ -23,20 +23,21 @@ API, per the subject's constraints.
   look-at params + dolly `zoom`), same design as `~/scop`'s. Unit tested.
 - Own transformation math — **built**: `src/transform.rs` on top of the
   [`pulgamecanica_matrix`](https://crates.io/crates/pulgamecanica_matrix)
-  dependency for the vector ops (`dot`/`cross_product`/`norm`/`add`/`sub`) —
-  `src/vec3.rs` is a thin `[f32; 3]` ergonomic wrapper over
-  `pulgamecanica_matrix::Vector<f32>`, shared by `obj`, `transform` and
-  `camera` so the actual math lives in one place (the crate), not
-  reimplemented three times. `translate`/`scale`/`rotate_axis_angle`/
-  `look_at`/`perspective` (the matrix formulas) ported from the same
-  `~/scop` C++ math code — **`perspective` is our own, not
-  `pulgamecanica_matrix::projection_matrix::projection()`**: that function
-  has a variable-shadowing bug (`b`, the bottom frustum bound, gets reused
-  as the Y-scale factor before the *original* `b` is needed again to compute
-  the Y-centering term), which corrupts the Y row and shifts everything
-  rendered off-screen vertically regardless of camera position. Caught by
-  `transform::tests::perspective_centers_a_point_on_the_view_axis`. Worth
-  fixing upstream in the crate itself at some point. Unit tested.
+  dependency, which supplies both `projection()` (called directly from
+  `camera.rs`/`mesh_demo.rs` — see below) and the vector ops
+  (`dot`/`cross_product`/`norm`/`add`/`sub`) — `src/vec3.rs` is a thin
+  `[f32; 3]` ergonomic wrapper over `pulgamecanica_matrix::Vector<f32>`,
+  shared by `obj`, `transform` and `camera` so the actual math lives in one
+  place (the crate), not reimplemented three times. `translate`/`scale`/
+  `rotate_axis_angle`/`look_at` (the matrix formulas) ported from the same
+  `~/scop` C++ math code. Unit tested.
+
+  `projection()` briefly had a variable-shadowing bug (`b`, the bottom
+  frustum bound, got reused as the Y-scale factor before the *original* `b`
+  was needed again for the Y-centering term, shifting everything rendered
+  off-screen vertically) — fixed upstream in `pulgamecanica_matrix` 1.0.2,
+  so this crate calls it directly again rather than carrying a local
+  workaround.
 - Shader compilation/management — **built**: `src/shader.rs`
   (`link_program`, raw `glCompileShader`/`glLinkProgram` with error-log
   surfacing). `assets/shaders/mesh.{vert,frag}` adapted from `~/scop`'s
