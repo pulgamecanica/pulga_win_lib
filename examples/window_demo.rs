@@ -1,7 +1,7 @@
 //! Opens a window, clears it to cornflower blue, closes on Escape.
 //! `cargo run --example window_demo` (needs a display).
 
-use PulgaWinLib::{App, Event, Key, WindowConfig, gl, run};
+use pulga_win_lib::{App, Event, Key, WindowConfig, gl, run};
 
 struct Demo;
 
@@ -21,5 +21,5 @@ impl App for Demo {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    run(WindowConfig { title: "PulgaWinLib window_demo".into(), ..Default::default() }, Demo)
+    run(WindowConfig { title: "pulga_win_lib window_demo".into(), ..Default::default() }, Demo)
 }

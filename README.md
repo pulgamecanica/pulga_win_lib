@@ -1,4 +1,4 @@
-# PulgaWinLib
+# pulga_win_lib
 
 Windowing + raw-graphics layer for the `42run` project (42 school "OpenGL
 graphic project" subject). Handles window/event creation and talks to
@@ -60,4 +60,4 @@ make               # make help
 ```
 
 Part of the [42Run](../42Run) workspace of independent projects; see the root
-README there for how this fits with `PulgaGuiLib` and `pulga_run`.
+README there for how this fits with `pulga_gui_lib` and `pulga_run`.

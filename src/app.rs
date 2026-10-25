@@ -16,7 +16,7 @@ use winit::window::{Window, WindowAttributes, WindowId};
 
 use crate::event::{translate_key, Event, Key};
 
-/// Configuration for the window PulgaWinLib opens.
+/// Configuration for the window pulga_win_lib opens.
 pub struct WindowConfig {
     pub title: String,
     pub width: u32,
@@ -30,7 +30,7 @@ impl Default for WindowConfig {
 }
 
 /// Implemented by whatever drives the window (the game, an example, a GUI
-/// gallery...). PulgaWinLib owns the window/event loop/GL context; the app
+/// gallery...). pulga_win_lib owns the window/event loop/GL context; the app
 /// only reacts to translated [`Event`]s and draws when asked.
 pub trait App {
     /// Called once, right after the GL context is current.

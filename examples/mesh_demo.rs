@@ -3,7 +3,7 @@
 //! check for `obj`, `shader`, `gl_mesh` and `transform`.
 //! `cargo run --example mesh_demo` (needs a display).
 
-use PulgaWinLib::{App, Event, Key, WindowConfig, gl, gl_mesh::GlMesh, obj, run, shader, transform};
+use pulga_win_lib::{App, Event, Key, WindowConfig, gl, gl_mesh::GlMesh, obj, run, shader, transform};
 use pulgamecanica_matrix::pulgamecanica::projection_matrix::projection;
 use std::time::Instant;
 
@@ -107,5 +107,5 @@ impl App for MeshDemo {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    run(WindowConfig { title: "PulgaWinLib mesh_demo — 42".into(), ..Default::default() }, MeshDemo::new())
+    run(WindowConfig { title: "pulga_win_lib mesh_demo — 42".into(), ..Default::default() }, MeshDemo::new())
 }
