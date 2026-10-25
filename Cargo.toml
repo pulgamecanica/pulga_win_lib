@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 gl = "0.14.0"
-pulgamecanica_matrix = "1.0.2"
+pulgamecanica_matrix = "1.0.3"
 raw-window-handle = "0.6.2"
 winit = "0.30.13"
 
