@@ -3,7 +3,7 @@
 
 /// A keyboard key, by physical position (a US-layout name), so WASD stays
 /// under the same fingers on any keyboard layout.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Key {
     /// Left arrow.
     Left,
@@ -42,7 +42,7 @@ pub enum Key {
 }
 
 /// A mouse button.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MouseButton {
     /// Primary (usually left) button.
     Left,
