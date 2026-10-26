@@ -48,16 +48,18 @@ API, per the subject's constraints.
   decoder first.
 - 2D & 3D canvas — **built**:
   - `src/render.rs`: `MeshRenderer`, a ready-made 3D pipeline (meshes in one
-    flat color under a fixed directional light, `assets/shaders/flat.*`) and
-    `clear()`.
-  - `src/canvas.rs`: `Canvas2d`, batched colored/textured rectangles in
-    window pixels with alpha blending (`assets/shaders/canvas.*`) — what
-    `pulga_gui_lib` draws widgets and text with.
+    flat color under a fixed directional light, optional distance fog,
+    `assets/shaders/flat.*`), `clear()` and `clear_depth()` (draw on top).
+  - `src/canvas.rs`: `Canvas2d`, batched 2D shapes in window pixels with
+    alpha blending (`assets/shaders/canvas.*`): plain and textured rects,
+    rounded rects with borders and soft drop shadows (signed distance field
+    in the fragment shader, anti-aliased at any size), and scissor clipping
+    — what `pulga_gui_lib` draws widgets and text with.
   - `src/texture.rs`: RGBA `Texture` upload (nearest/linear). Pixel data
     comes from the caller (generated, or from a single-format decoder).
 
 `src/gl_mesh.rs` uploads a parsed `obj::Mesh` to a VAO/VBO/EBO and draws it.
-`src/primitives.rs` generates procedural meshes (cube, ground plane) in the
+`src/primitives.rs` generates procedural meshes (cube, ground plane, UV sphere) in the
 same `Mesh` shape, for gameplay geometry that isn't OBJ-authored —
 `pulga_run`'s player/obstacles/ground use these.
 `cargo run --example mesh_demo` ties the OBJ pipeline together: loads

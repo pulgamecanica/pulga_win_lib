@@ -32,6 +32,15 @@ pub unsafe fn clear(color: [f32; 4]) {
     }
 }
 
+/// Clears only depth, so what's drawn next lands on top of everything drawn
+/// so far (gizmos, selection outlines).
+///
+/// # Safety
+/// Requires a current GL context.
+pub unsafe fn clear_depth() {
+    unsafe { gl::Clear(gl::DEPTH_BUFFER_BIT) };
+}
+
 /// See the [module docs](self). `!Send`: it must stay on the GL thread.
 pub struct MeshRenderer {
     program: gl::types::GLuint,
@@ -39,6 +48,7 @@ pub struct MeshRenderer {
     view_loc: gl::types::GLint,
     model_loc: gl::types::GLint,
     color_loc: gl::types::GLint,
+    fog_loc: gl::types::GLint,
     _gl_thread: PhantomData<*const ()>,
 }
 
@@ -60,6 +70,7 @@ impl MeshRenderer {
                 view_loc: shader::uniform_location(program, "view"),
                 model_loc: shader::uniform_location(program, "model"),
                 color_loc: shader::uniform_location(program, "color"),
+                fog_loc: shader::uniform_location(program, "fog"),
                 _gl_thread: PhantomData,
             }
         }
@@ -79,6 +90,17 @@ impl MeshRenderer {
             gl::UniformMatrix4fv(self.proj_loc, 1, gl::TRUE, transform::to_gl(proj).as_ptr());
             gl::UniformMatrix4fv(self.view_loc, 1, gl::TRUE, transform::to_gl(view).as_ptr());
         }
+    }
+
+    /// Fades what's far from the camera into `color`: the fog thickens
+    /// with `density` (per world unit; about `1.5 / density` units away a
+    /// mesh is mostly fogged). `0.0` turns fog off, the default. Applies to
+    /// draws after the latest [`MeshRenderer::begin`].
+    ///
+    /// # Safety
+    /// Requires a current GL context and a preceding [`MeshRenderer::begin`].
+    pub unsafe fn set_fog(&self, color: [f32; 3], density: f32) {
+        unsafe { gl::Uniform4f(self.fog_loc, color[0], color[1], color[2], density) };
     }
 
     /// Draws `mesh` placed by `model`, in RGBA `color`.

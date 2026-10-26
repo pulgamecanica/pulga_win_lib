@@ -25,6 +25,10 @@ pub enum Key {
     Delete,
     /// Tab.
     Tab,
+    /// Home.
+    Home,
+    /// End.
+    End,
     /// Either Shift key.
     Shift,
     /// Either Control key (Command is not mapped here).
@@ -62,6 +66,10 @@ pub enum Event {
     KeyDown(Key),
     /// A key went up.
     KeyUp(Key),
+    /// A character was typed, after keyboard layout, Shift and dead keys
+    /// (for text fields). Sent after the matching [`Event::KeyDown`];
+    /// control characters are not sent.
+    Text(char),
     /// The cursor moved, in physical pixels from the window's top-left.
     MouseMoved {
         /// Pixels from the left edge.
@@ -157,6 +165,8 @@ pub(crate) fn translate_key(code: winit::keyboard::KeyCode) -> Key {
         K::Backspace => Key::Backspace,
         K::Delete => Key::Delete,
         K::Tab => Key::Tab,
+        K::Home => Key::Home,
+        K::End => Key::End,
         K::ShiftLeft | K::ShiftRight => Key::Shift,
         K::ControlLeft | K::ControlRight => Key::Control,
         _ => Key::Other,

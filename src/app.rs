@@ -168,12 +168,17 @@ impl<A: App> ApplicationHandler for Handler<A> {
                     PhysicalKey::Code(code) => translate_key(code),
                     PhysicalKey::Unidentified(_) => Key::Other,
                 };
-                let translated = if key_event.state.is_pressed() {
+                let pressed = key_event.state.is_pressed();
+                self.app.event(if pressed {
                     Event::KeyDown(key)
                 } else {
                     Event::KeyUp(key)
-                };
-                self.app.event(translated);
+                });
+                if pressed && let Some(text) = &key_event.text {
+                    for c in text.chars().filter(|c| !c.is_control()) {
+                        self.app.event(Event::Text(c));
+                    }
+                }
             }
             WindowEvent::CursorMoved { position, .. } => {
                 self.app.event(Event::MouseMoved {

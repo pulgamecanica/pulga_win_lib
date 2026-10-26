@@ -113,9 +113,61 @@ pub fn ground_plane(width: f32, length: f32) -> Mesh {
     }
 }
 
+/// A UV sphere centered on the origin: `rings` bands from pole to pole,
+/// `segments` slices around the equator (at least 2 and 3).
+pub fn sphere(radius: f32, rings: u32, segments: u32) -> Mesh {
+    let (rings, segments) = (rings.max(2), segments.max(3));
+    let mut vertices = Vec::new();
+    for r in 0..=rings {
+        let theta = std::f32::consts::PI * r as f32 / rings as f32; // 0 at +y
+        for s in 0..=segments {
+            let phi = std::f32::consts::TAU * s as f32 / segments as f32;
+            let normal = [
+                theta.sin() * phi.cos(),
+                theta.cos(),
+                theta.sin() * phi.sin(),
+            ];
+            vertices.push(Vertex {
+                pos: normal.map(|n| n * radius),
+                normal,
+                uv: [s as f32 / segments as f32, r as f32 / rings as f32],
+                face_id: r * segments + s,
+            });
+        }
+    }
+    let row = segments + 1;
+    let mut indices = Vec::new();
+    for r in 0..rings {
+        for s in 0..segments {
+            let (a, b) = (r * row + s, (r + 1) * row + s);
+            // Counter-clockwise seen from outside.
+            indices.extend_from_slice(&[a, a + 1, b, a + 1, b + 1, b]);
+        }
+    }
+    Mesh {
+        vertices,
+        indices,
+        centroid: [0.0; 3],
+        main_axis: [0.0, 1.0, 0.0],
+        has_uv: true,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sphere_vertices_sit_on_the_radius_with_outward_normals() {
+        let m = sphere(2.0, 8, 12);
+        assert_eq!(m.vertices.len(), 9 * 13);
+        assert_eq!(m.indices.len(), (8 * 12 * 6) as usize);
+        for v in &m.vertices {
+            let len = (v.pos[0].powi(2) + v.pos[1].powi(2) + v.pos[2].powi(2)).sqrt();
+            assert!((len - 2.0).abs() < 1e-4);
+            assert!((0..3).all(|i| (v.pos[i] - v.normal[i] * 2.0).abs() < 1e-4));
+        }
+    }
 
     #[test]
     fn cube_has_six_faces_of_four_vertices() {
