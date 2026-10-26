@@ -165,8 +165,12 @@ impl<A: App> ApplicationHandler for Handler<A> {
                     height: size.height,
                 });
             }
+            // Synthetic presses are the keys already held when the window
+            // gains focus: not something the user did to this window.
             WindowEvent::KeyboardInput {
-                event: key_event, ..
+                event: key_event,
+                is_synthetic: false,
+                ..
             } => {
                 let key = match key_event.physical_key {
                     PhysicalKey::Code(code) => translate_key(code),
