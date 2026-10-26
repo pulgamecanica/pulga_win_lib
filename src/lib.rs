@@ -23,6 +23,8 @@ pub mod gl_mesh;
 pub mod obj;
 pub mod primitives;
 pub mod render;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod screenshot;
 pub mod shader;
 pub mod texture;
 pub mod time;

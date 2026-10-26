@@ -66,6 +66,12 @@ same `Mesh` shape, for gameplay geometry that isn't OBJ-authored —
 `assets/models/42.obj`, compiles the shader, and spins the logo in front of
 an auto-framed camera.
 
+`src/screenshot.rs` reads a frame back (`glReadPixels`) and encodes it as a
+PNG with our own minimal encoder (uncompressed deflate blocks, no library).
+Any app saves a screenshot and quits when run with
+`PULGA_SCREENSHOT=out.png` (after `PULGA_SCREENSHOT_FRAMES`, default 30) —
+the basis for documentation screenshots.
+
 `App::title()` (default `None`) lets a consumer update the window title
 every frame it returns `Some` — `pulga_run` uses it as a crude distance
 meter, since there's no on-screen text rendering yet.

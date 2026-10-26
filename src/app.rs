@@ -15,6 +15,7 @@ use winit::keyboard::PhysicalKey;
 use winit::window::{Window, WindowAttributes, WindowId};
 
 use crate::event::{Event, Key, translate_button, translate_key};
+use crate::screenshot;
 
 /// Configuration for the window pulga_win_lib opens.
 pub struct WindowConfig {
@@ -68,6 +69,9 @@ struct Handler<A: App> {
     config: WindowConfig,
     app: A,
     gl: Option<GlState>,
+    /// From `PULGA_SCREENSHOT`: where to save a frame, and how many frames
+    /// to draw first.
+    screenshot: Option<(std::path::PathBuf, u32)>,
 }
 
 impl<A: App> ApplicationHandler for Handler<A> {
@@ -209,6 +213,19 @@ impl<A: App> ApplicationHandler for Handler<A> {
                 if let Some(title) = self.app.title() {
                     gl.window.set_title(&title);
                 }
+                if let Some((path, frames_left)) = self.screenshot.as_mut() {
+                    if *frames_left == 0 {
+                        let size = gl.window.inner_size();
+                        let rgba = unsafe { screenshot::capture(size.width, size.height) };
+                        let png = screenshot::encode_png(size.width, size.height, &rgba);
+                        match std::fs::write(&*path, png) {
+                            Ok(()) => eprintln!("screenshot saved to {}", path.display()),
+                            Err(e) => eprintln!("screenshot {}: {e}", path.display()),
+                        }
+                        event_loop.exit();
+                    }
+                    *frames_left = frames_left.saturating_sub(1);
+                }
                 gl.surface
                     .swap_buffers(&gl.context)
                     .expect("failed to swap buffers");
@@ -228,17 +245,31 @@ impl<A: App> ApplicationHandler for Handler<A> {
     }
 }
 
-/// Opens a window and runs `app` until the window is closed.
+/// Opens a window and runs `app` until the window is closed (or
+/// [`App::should_quit`]).
+///
+/// With the `PULGA_SCREENSHOT` environment variable set to a file path, the
+/// app draws `PULGA_SCREENSHOT_FRAMES` frames (default 30), saves the last
+/// one there as a PNG (see [`crate::screenshot`]) and quits. That's how
+/// documentation screenshots are taken.
 pub fn run(
     config: WindowConfig,
     app: impl App + 'static,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let event_loop = EventLoop::new()?;
     event_loop.set_control_flow(ControlFlow::Poll);
+    let screenshot = std::env::var_os("PULGA_SCREENSHOT").map(|path| {
+        let frames = std::env::var("PULGA_SCREENSHOT_FRAMES")
+            .ok()
+            .and_then(|f| f.parse().ok())
+            .unwrap_or(30);
+        (std::path::PathBuf::from(path), frames)
+    });
     let mut handler = Handler {
         config,
         app,
         gl: None,
+        screenshot,
     };
     event_loop.run_app(&mut handler)?;
     Ok(())
